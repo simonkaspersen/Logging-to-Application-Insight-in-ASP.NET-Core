@@ -1,78 +1,154 @@
-# Product Name
-> Short blurb about what your product does.
+<p align="center"> <img src="log.png" alt="log(ging)" width="80"/> </p>
 
-[![NPM Version][npm-image]][npm-url]
-[![Build Status][travis-image]][travis-url]
-[![Downloads Stats][npm-downloads]][npm-url]
+## Logging in ASP.NET Core using ILoggerFactory-pattern to Azure Application Insight
 
-One to two paragraph statement about your product and what it does.
 
-![](header.png)
+> **Disclaimer:**
+> Images and steps used in this example may change over time, but may be a good reference.
 
-## Installation
+## Goal
+**Short answer:** Make logging great again
 
-OS X & Linux:
+**Slightly longer answer:** Make the application send performance-data to Application Insight. Also make all logging from the frameworks, and logging done by me, automatically be sent to Azure for further analysis.
 
-```sh
-npm install my-crazy-module --save
+### Packages used
+* **NLog** - Base package for NLog
+* **NLog.Web:AspNetCore** - Adds helpers and layout renderes for the ASP.NET core platform
+* **Lightinject** - IOC-container
+* **Lightinject.Microsoft.AspNetCore.Hosting** - Enables Lightinject to be used in ASP.NET core applications
+* **Microsoft.ApplicationInsight.AspNetCore** - Official package work working with Azure Application Insight
+* **Microsoft.ApplicationInsight.NLogTarget** - Allowing you to send NLog messages to Application Insight
+
+# Steps
+
+## 01 - Azure
+
+1. First we have to make ourself a Application Insight resource in Azure.
+<p align="center"> <img src="images/Azure-Step1.png" alt="drawing" width="550"/> </p>
+
+<p align="center"> <img src="images/Azure-Step2.png" alt="drawing" width="550"/> </p>
+
+3. Fill in information about your application, and give it a descriptive name
+<p align="center"> <img src="images/Azure-Step3.png" alt="drawing" width="550"/> </p>
+
+4. Now we are almost done. Create it, and take note of the Instrumentation Key. We will use it shortly
+<p align="center"> <img src="images/Azure-Step4.png" alt="drawing" width="550"/> </p>
+
+## 02 - Code
+This is based on the example project in this repo. It is a simple project created using the dotnet cli and this command: `dotnet new webapi`. 
+
+After the template is bootstrapped we need some base-files and interfaces. Big shoutout to @andmos for providing me with the base logfiles for this project. 
+
+File | What it does
+------------ | -------------
+`ILog.cs` | Is the base log-interface used when logging.
+`ILogFactory.cs` | The abstraction of the log-factory. This gets the implemented logger from the IOC-container
+`Log.cs` | Gets bootstrapped to log-actions for common `Log Levels`.
+`NLogFactory.cs` | Implements a factory that produces logging based on NLog.
+`ILogFactoryInitializer` | An abstraction for the builder-method that adds the logger to the ASP.Net Core-app.
+`NLogFactoryInitializer` | Implements the `.UseNLog()` used in `Program.cs` to setup NLog for DI.
+
+
+### Noteable changes to the code:
+**Program.cs** - gets logger factory initializer *(wow. good name. thanks)* from container and passes the `WebHostBuilder` to the implementet builder-method.
+
+```csharp
+public static void Main(string[] args)
+{
+    var container = new ServiceContainer();
+    var loggerFactoryInitializer = container.GetInstance<ILogFactoryInitializer>();
+    var webhostBuilder = CreateWebHostBuilder(args);
+    loggerFactoryInitializer.UseLogger(webhostBuilder);
+    
+    webhostBuilder.Build().Run();
+}
+``` 
+**ValuesController.cs** - Added examples of logging. With `Log Level` *Information* and *Error*.
+
+```csharp
+// GET api/values
+[HttpGet]
+public ActionResult<IEnumerable<string>> Get()
+{
+    var values = new []{"value1", "value2"};
+    _logger.Info($"Request made, returning:{JsonConvert.SerializeObject(values)}");
+    return values;
+}
 ```
 
-Windows:
-
-```sh
-edit autoexec.bat
+```csharp
+// GET api/values
+[HttpGet("ThrowPlease")]
+public IActionResult ThrowMePlox()
+{
+    try
+    {
+        throw new ArithmeticException("Dividing by 0?? Good luck");
+    }
+    catch (Exception e)
+    {
+        _logger.Error("This was bad. not good", e);
+        return BadRequest();
+    }
+}
 ```
 
-## Usage example
 
-A few motivating and useful examples of how your product can be used. Spice this up with code blocks and potentially more screenshots.
+**appsettings.json** - contains the Application Insight Key for this project. This can also easily be set as an Enviromental Variable.
+The Application Insight framework will automatically search for this path in `appsettings.json` 
 
-_For more examples and usage, please refer to the [Wiki][wiki]._
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Warning"
+    }
+  },
+  "ApplicationInsights": {
+    "InstrumentationKey": "<KEY>"
+  },
+  "AllowedHosts": "*"
+}
+```
+## Test the example app
 
-## Development setup
 
-Describe how to install all development dependencies and how to run an automated test-suite of some kind. Potentially do this for multiple platforms.
+```bash
+# clone the project
+git clone https://github.com/simonkaspersen/Logging-to-Application-Insight-in-ASP.NET-Core.git
 
-```sh
-make install
-npm test
+# enter the project directory
+cd Logging-to-Application-Insight-in-ASP.NET-Core
+
+# Add your key to appsettings.json
+
+# install dependencies
+dotnet restore
+
+# build solution
+dotnet build
+
+# Run
+dotnet run
 ```
 
-## Release History
+This will open the API at http://localhost:5000.
 
-* 0.2.1
-    * CHANGE: Update docs (module code remains unchanged)
-* 0.2.0
-    * CHANGE: Remove `setDefaultXYZ()`
-    * ADD: Add `init()`
-* 0.1.1
-    * FIX: Crash when calling `baz()` (Thanks @GenerousContributorName!)
-* 0.1.0
-    * The first proper release
-    * CHANGE: Rename `foo()` to `bar()`
-* 0.0.1
-    * Work in progress
+* Go to `http://localhost:5000/api/values/` to test *Information*-logging
+* Go to `http://localhost:5000/api/values/throwplease` to test *Error*-logging
 
-## Meta
 
-Your Name – [@YourTwitter](https://twitter.com/dbader_org) – YourEmail@example.com
+## Links to resources
+* [NLog - ASP.NET core](https://github.com/NLog/NLog.Web/wiki/Getting-started-with-ASP.NET-Core-2)
+* [NLog - Application Insight](https://cmatskas.com/working-with-application-insights-and-nlog-in-console-apps-net/)
 
-Distributed under the XYZ license. See ``LICENSE`` for more information.
+## TODO
+- [x] Deside if *Pepsi Max* or *Cola No Sugar* is best
+- [x] Implement **NLog**
+- [ ] Implement **Log4Net**
+- [ ] Implement **Serilog**
 
-[https://github.com/yourname/github-link](https://github.com/dbader/)
 
-## Contributing
+## Thanks to
+* **@andmos**
 
-1. Fork it (<https://github.com/yourname/yourproject/fork>)
-2. Create your feature branch (`git checkout -b feature/fooBar`)
-3. Commit your changes (`git commit -am 'Add some fooBar'`)
-4. Push to the branch (`git push origin feature/fooBar`)
-5. Create a new Pull Request
-
-<!-- Markdown link & img dfn's -->
-[npm-image]: https://img.shields.io/npm/v/datadog-metrics.svg?style=flat-square
-[npm-url]: https://npmjs.org/package/datadog-metrics
-[npm-downloads]: https://img.shields.io/npm/dm/datadog-metrics.svg?style=flat-square
-[travis-image]: https://img.shields.io/travis/dbader/node-datadog-metrics/master.svg?style=flat-square
-[travis-url]: https://travis-ci.org/dbader/node-datadog-metrics
-[wiki]: https://github.com/yourname/yourproject/wiki

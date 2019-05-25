@@ -22,7 +22,6 @@ namespace Logging_to_Application_Insight_in_ASP.NET_Core
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                    .UseLightInject()
-                   //.UseNLog()
                    .UseApplicationInsights()
                    .UseStartup<Startup>();
     }
