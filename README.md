@@ -24,15 +24,15 @@
 ## 01 - Azure
 
 1. First we have to make ourself a Application Insight resource in Azure.
-<p align="center"> <img src="images/Azure-Step1.png" alt="drawing" width="550"/> </p>
+<p align="center"> <img src="images/Azure-Step1.PNG" alt="drawing" width="550"/> </p>
 
-<p align="center"> <img src="images/Azure-Step2.png" alt="drawing" width="550"/> </p>
+<p align="center"> <img src="images/Azure-Step2.PNG" alt="drawing" width="550"/> </p>
 
 3. Fill in information about your application, and give it a descriptive name
-<p align="center"> <img src="images/Azure-Step3.png" alt="drawing" width="550"/> </p>
+<p align="center"> <img src="images/Azure-Step3.PNG" alt="drawing" width="550"/> </p>
 
 4. Now we are almost done. Create it, and take note of the Instrumentation Key. We will use it shortly
-<p align="center"> <img src="images/Azure-Step4.png" alt="drawing" width="550"/> </p>
+<p align="center"> <img src="images/Azure-Step4.PNG" alt="drawing" width="550"/> </p>
 
 ## 02 - Code
 This is based on the example project in this repo. It is a simple project created using the dotnet cli and this command: `dotnet new webapi`. 
@@ -112,8 +112,8 @@ The Application Insight framework will automatically search for this path in `ap
 ```
 
 ## 03 - Admire the result
-<p align="center"> <img src="images/Result1.png" alt="result1" width="650"/> </p>
-<p align="center"> <img src="images/Result2.png" alt="result2" width="650"/> </p>
+<p align="center"> <img src="images/Result1.PNG" alt="result1" width="650"/> </p>
+<p align="center"> <img src="images/Result2.PNG" alt="result2" width="650"/> </p>
 
 >Log-entries can be searched and filtered in the `search`-tab in Application Insight. Other performance-data can be found i `Metrics`. 
 
