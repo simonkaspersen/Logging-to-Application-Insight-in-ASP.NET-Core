@@ -16,7 +16,7 @@
 * **NLog.Web:AspNetCore** - Adds helpers and layout renderes for the ASP.NET core platform
 * **Lightinject** - IOC-container
 * **Lightinject.Microsoft.AspNetCore.Hosting** - Enables Lightinject to be used in ASP.NET core applications
-* **Microsoft.ApplicationInsight.AspNetCore** - Official package work working with Azure Application Insight
+* **Microsoft.ApplicationInsight.AspNetCore** - Official package for working with Azure Application Insight
 * **Microsoft.ApplicationInsight.NLogTarget** - Allowing you to send NLog messages to Application Insight
 
 # Steps
@@ -110,6 +110,13 @@ The Application Insight framework will automatically search for this path in `ap
   "AllowedHosts": "*"
 }
 ```
+
+## 03 - Admire the result
+<p align="center"> <img src="images/Result1.png" alt="result1" width="650"/> </p>
+<p align="center"> <img src="images/Result2.png" alt="result2" width="650"/> </p>
+
+>Log-entries can be searched and filtered in the `search`-tab in Application Insight. Other performance-data can be found i `Metrics`. 
+
 ## Test the example app
 
 
@@ -143,7 +150,7 @@ This will open the API at http://localhost:5000.
 * [NLog - Application Insight](https://cmatskas.com/working-with-application-insights-and-nlog-in-console-apps-net/)
 
 ## TODO
-- [x] Deside if *Pepsi Max* or *Cola No Sugar* is best
+- [x] Deside if *Pepsi Max* or *Coca Cola No Sugar* is best
 - [x] Implement **NLog**
 - [ ] Implement **Log4Net**
 - [ ] Implement **Serilog**
